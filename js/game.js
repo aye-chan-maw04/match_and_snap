@@ -1,3 +1,83 @@
+// ========== GAME SOUND SYSTEM ==========
+let gameAudioCtx = null;
+let gameSoundEnabled = true;
+
+function initGameAudio() {
+    if (!gameAudioCtx) {
+        gameAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playGameSound(type) {
+    if (!gameSoundEnabled) return;
+    
+    initGameAudio();
+    if (gameAudioCtx.state === 'suspended') {
+        gameAudioCtx.resume();
+    }
+    
+    const osc = gameAudioCtx.createOscillator();
+    const gain = gameAudioCtx.createGain();
+    
+    switch(type) {
+        case 'flip':
+            osc.frequency.value = 600;
+            gain.gain.setValueAtTime(0.08, gameAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, gameAudioCtx.currentTime + 0.1);
+            break;
+        case 'match':
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.15, gameAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, gameAudioCtx.currentTime + 0.3);
+            break;
+        case 'win':
+            // Victory jingle - play 3 notes
+            const notes = [523.25, 659.25, 783.99];
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    const noteOsc = gameAudioCtx.createOscillator();
+                    const noteGain = gameAudioCtx.createGain();
+                    noteOsc.frequency.value = freq;
+                    noteGain.gain.setValueAtTime(0.15, gameAudioCtx.currentTime);
+                    noteGain.gain.exponentialRampToValueAtTime(0.01, gameAudioCtx.currentTime + 0.3);
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(gameAudioCtx.destination);
+                    noteOsc.start();
+                    noteOsc.stop(gameAudioCtx.currentTime + 0.3);
+                }, i * 150);
+            });
+            return;
+        case 'coin':
+            osc.frequency.value = 1000;
+            gain.gain.setValueAtTime(0.12, gameAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, gameAudioCtx.currentTime + 0.2);
+            break;
+        case 'click':
+            osc.frequency.value = 500;
+            gain.gain.setValueAtTime(0.1, gameAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, gameAudioCtx.currentTime + 0.1);
+            break;
+        default:
+            osc.frequency.value = 400;
+            gain.gain.setValueAtTime(0.1, gameAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, gameAudioCtx.currentTime + 0.15);
+    }
+    
+    osc.connect(gain);
+    gain.connect(gameAudioCtx.destination);
+    osc.start();
+    osc.stop(gameAudioCtx.currentTime + 0.3);
+}
+
+function toggleGameSound() {
+    gameSoundEnabled = !gameSoundEnabled;
+    const btn = document.getElementById('sound-toggle-btn');
+    if (btn) {
+        btn.innerHTML = gameSoundEnabled ? '<i class="fas fa-volume-up"></i> Sound On' : '<i class="fas fa-volume-mute"></i> Sound Off';
+    }
+    playGameSound('click');
+}
+
 // ========== GAME STATE ==========
 let currentGame = {
     cards: [],
@@ -49,9 +129,11 @@ function renderGameBoard() {
         
         card.innerHTML = `
             <div class="card-front">
-                <img src="${imageUrl}" alt="Hirono character">
+                <img src="${imageUrl}" alt="Character">
             </div>
-            <div class="card-back"></div>
+            <div class="card-back">
+                <span style="font-size: 2em;"></span>
+            </div>
         `;
         
         card.addEventListener('click', () => flipCard(index));
@@ -67,6 +149,8 @@ function flipCard(index) {
     if (currentGame.flippedCards.length >= 2) return;
     
     card.classList.add('flipped');
+    playGameSound('flip');
+    
     currentGame.flippedCards.push({
         index: index,
         image: card.dataset.image,
@@ -84,14 +168,18 @@ function checkForMatch() {
     const [card1, card2] = currentGame.flippedCards;
     
     if (card1.image === card2.image) {
-        // Match found
+        // Match found!
         card1.element.dataset.matched = 'true';
         card2.element.dataset.matched = 'true';
+        card1.element.style.animation = 'imagePop 0.3s ease';
+        card2.element.style.animation = 'imagePop 0.3s ease';
         
         currentGame.matches++;
         document.getElementById('matches').textContent = currentGame.matches;
         
         addCoins(10);
+        playGameSound('match');
+        showToast('🎉 Match! +10 coins', 'success');
         
         currentGame.flippedCards = [];
         
@@ -99,8 +187,9 @@ function checkForMatch() {
         const totalPairs = currentGame.cards.length / 2;
         if (currentGame.matches === totalPairs) {
             addCoins(50);
+            playGameSound('win');
             createConfetti();
-            showToast('🎉 Game Complete! +50 coins!', 'success');
+            showToast('🏆 Game Complete! +50 coins! 🏆', 'success');
         }
     } else {
         // No match
@@ -111,7 +200,7 @@ function checkForMatch() {
             card2.element.classList.remove('flipped');
             currentGame.flippedCards = [];
             currentGame.canFlip = true;
-        }, 1000);
+        }, 800);
     }
 }
 
@@ -124,6 +213,7 @@ function resetGame() {
     document.getElementById('moves').textContent = '0';
     document.getElementById('matches').textContent = '0';
     
+    playGameSound('click');
     initGame();
 }
 
@@ -135,6 +225,7 @@ function setDifficulty(difficulty) {
     });
     event.target.classList.add('active');
     
+    playGameSound('click');
     resetGame();
 }
 
@@ -146,6 +237,7 @@ function setCharacterSet(setName) {
     });
     event.target.classList.add('active');
     
+    playGameSound('click');
     resetGame();
 }
 
@@ -159,9 +251,27 @@ function adjustCardSize(size) {
     });
 }
 
+// Add this CSS animation if not present
+const gameStyle = document.createElement('style');
+gameStyle.textContent = `
+    @keyframes imagePop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+`;
+document.head.appendChild(gameStyle);
+
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('game-board')) {
         initGame();
+        // Initialize audio on first user interaction
+        document.body.addEventListener('click', function initAudioOnClick() {
+            if (gameAudioCtx && gameAudioCtx.state === 'suspended') {
+                gameAudioCtx.resume();
+            }
+            document.body.removeEventListener('click', initAudioOnClick);
+        });
     }
 });

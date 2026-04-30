@@ -7,7 +7,7 @@ let photoBoothState = {
     capturing: false,
     currentSlot: 0,
     selectedPhotoIndex: -1,
-    quality: 'medium', // low, medium, high
+    sessionPaid: false,
     editingTools: {
         brightness: 100,
         contrast: 100,
@@ -15,13 +15,6 @@ let photoBoothState = {
         blur: 0
     },
     stickers: [[], [], [], []]
-};
-
-// Quality settings (resolution for photos)
-const qualitySettings = {
-    low: { width: 320, height: 320, label: 'Low (480p)' },
-    medium: { width: 640, height: 640, label: 'Medium (720p)' },
-    high: { width: 1080, height: 1080, label: 'High (1080p)' }
 };
 
 // Image stickers
@@ -32,16 +25,172 @@ const imageStickersList = [
     { id: 'crown', name: 'Crown', url: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="gold"%3E%3Cpath d="M5,16L3,5L8.5,10L12,4L15.5,10L21,5L19,16H5Z"%3E%3C/path%3E%3C/svg%3E' }
 ];
 
-// ========== QUALITY SETTINGS ==========
-function setQuality(level) {
-    photoBoothState.quality = level;
+// Photo session cost
+const PHOTO_SESSION_COST = 100;
+
+// Initialize gameState if not exists
+if (typeof gameState === 'undefined') {
+    window.gameState = {
+        coins: 0,
+        photos: [],
+        unlockedItems: ['normal', 'none'],
+        avatar: '👧',
+        achievements: {}
+    };
+}
+
+// ========== SOUND EFFECTS ==========
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let soundEnabled = true;
+
+function playSound(type) {
+    if (!soundEnabled) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     
-    document.querySelectorAll('.quality-btn').forEach(btn => {
-        btn.classList.remove('active');
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    switch(type) {
+        case 'shutter':
+            osc.frequency.value = 200;
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            break;
+        case 'success':
+            osc.frequency.value = 800;
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            break;
+        case 'click':
+            osc.frequency.value = 600;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            break;
+        case 'countdown':
+            osc.frequency.value = 700;
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            break;
+        default:
+            osc.frequency.value = 500;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+    }
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+}
+
+// ========== TOAST NOTIFICATION SYSTEM ==========
+let currentProgressToast = null;
+
+function showToast(title, message, type = 'info', duration = 3000) {
+    const container = document.getElementById('chic-toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `chic-toast ${type}`;
+    
+    let icon = '📸';
+    switch(type) {
+        case 'success': icon = '✓'; break;
+        case 'error': icon = '✗'; break;
+        case 'warning': icon = '⚠'; break;
+        case 'info': icon = '✨'; break;
+    }
+    
+    toast.innerHTML = `
+        <div class="chic-toast-icon">${icon}</div>
+        <div class="chic-toast-content">
+            <div class="chic-toast-title">${title}</div>
+            <div class="chic-toast-message">${message}</div>
+        </div>
+        <div class="chic-toast-close" onclick="this.parentElement.remove()">✕</div>
+    `;
+    
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
+    
+    toast.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('chic-toast-close')) {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }
     });
-    event.target.classList.add('active');
     
-    showToast(`📷 Quality set to ${qualitySettings[level].label}`, 'success');
+    playSound('click');
+}
+
+function showProgressToast(title, message) {
+    if (currentProgressToast) currentProgressToast.remove();
+    
+    const container = document.getElementById('chic-toast-container');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'chic-toast progress';
+    toast.innerHTML = `
+        <div class="chic-toast-icon">⏳</div>
+        <div class="chic-toast-content">
+            <div class="chic-toast-title">${title}</div>
+            <div class="chic-toast-message">${message}</div>
+            <div class="chic-progress-bar">
+                <div class="chic-progress-fill" id="progress-fill-toast"></div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.add('show'), 10);
+    currentProgressToast = toast;
+    return toast;
+}
+
+function updateProgressToast(percent, text) {
+    if (currentProgressToast) {
+        const fill = currentProgressToast.querySelector('#progress-fill-toast');
+        const msgEl = currentProgressToast.querySelector('.chic-toast-message');
+        if (fill) fill.style.width = percent + '%';
+        if (msgEl && text) msgEl.innerHTML = text;
+    }
+}
+
+function closeProgressToast() {
+    if (currentProgressToast) {
+        currentProgressToast.classList.remove('show');
+        setTimeout(() => {
+            if (currentProgressToast) currentProgressToast.remove();
+            currentProgressToast = null;
+        }, 400);
+    }
+}
+
+// ========== COST CHECK FUNCTION ==========
+function checkAndStartPhotoStrip() {
+    if (!gameState || gameState.coins < PHOTO_SESSION_COST) {
+        showToast('Insufficient Coins', `You need ${PHOTO_SESSION_COST} coins to take photos! Play the Memory Game to earn coins.`, 'warning');
+        const insufficientDiv = document.getElementById('insufficient-coins');
+        if (insufficientDiv) insufficientDiv.style.display = 'block';
+        return;
+    }
+    
+    gameState.coins -= PHOTO_SESSION_COST;
+    if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+    if (typeof saveProgress === 'function') saveProgress();
+    
+    showToast('Payment Received', `✨ Paid ${PHOTO_SESSION_COST} coins! Now take your 4 photos! ✨`, 'success');
+    const insufficientDiv = document.getElementById('insufficient-coins');
+    if (insufficientDiv) insufficientDiv.style.display = 'none';
+    photoBoothState.sessionPaid = true;
+    
+    startPhotoStrip();
 }
 
 // ========== INITIALIZE ==========
@@ -49,6 +198,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('video')) {
         startCamera();
         loadImageStickers();
+        if (typeof updateCoinDisplay === 'function') updateCoinDisplay();
+        
+        if (gameState && gameState.coins < PHOTO_SESSION_COST) {
+            const insufficientDiv = document.getElementById('insufficient-coins');
+            if (insufficientDiv) insufficientDiv.style.display = 'block';
+        }
     }
 });
 
@@ -65,26 +220,26 @@ function loadImageStickers() {
 
 function addImageSticker(imageUrl) {
     if (photoBoothState.selectedPhotoIndex === -1) {
-        showToast('⚠️ Click on a photo first to add stickers!', 'warning');
+        showToast('Select Photo', 'Click on a photo first to add stickers!', 'warning');
         return;
     }
     
     if (!photoBoothState.photos[photoBoothState.selectedPhotoIndex]) {
-        showToast('⚠️ No photo in this slot! Take photos first.', 'warning');
+        showToast('No Photo', 'No photo in this slot! Take photos first.', 'warning');
         return;
     }
     
     photoBoothState.stickers[photoBoothState.selectedPhotoIndex].push({
         type: 'image',
         url: imageUrl,
-        x: Math.random() * 150 + 20,
-        y: Math.random() * 150 + 20,
-        size: 45,
+        x: Math.random() * 700 + 80,
+        y: Math.random() * 500 + 70,
+        size: 70,
         rotation: Math.random() * 30 - 15
     });
     
     updatePhotoWithStickers();
-    showToast('✨ Image sticker added!', 'success');
+    showToast('Sticker Added', '✨ Image sticker added to your photo!', 'success');
 }
 
 // ========== FILTER FUNCTIONS ==========
@@ -92,7 +247,7 @@ function checkAndApplyFilter(filterId) {
     if (gameState.unlockedItems && gameState.unlockedItems.includes(filterId)) {
         applyFilter(filterId);
     } else {
-        showToast('🔒 Buy this filter in the shop first! (50-100 coins)', 'warning');
+        showToast('Locked', 'Buy this filter in the shop first! (50-100 coins)', 'warning');
     }
 }
 
@@ -106,7 +261,8 @@ function applyFilter(filterId) {
     const activeBtn = document.querySelector(`.filter-btn[data-filter="${filterId}"]`);
     if (activeBtn) activeBtn.classList.add('active');
     
-    showToast(`✨ ${getFilterName(filterId)} filter applied!`, 'success');
+    showToast('Filter Applied', `✨ ${getFilterName(filterId)} filter applied!`, 'info');
+    playSound('click');
 }
 
 function getFilterName(filterId) {
@@ -126,7 +282,7 @@ function checkAndApplyFrame(frameId) {
     if (gameState.unlockedItems && gameState.unlockedItems.includes(frameId)) {
         applyFrame(frameId);
     } else {
-        showToast('🔒 Buy this frame in the shop first! (75-100 coins)', 'warning');
+        showToast('Locked', 'Buy this frame in the shop first! (75-100 coins)', 'warning');
     }
 }
 
@@ -148,7 +304,8 @@ function applyFrame(frameId) {
         }
     }
     
-    showToast(`🖼️ ${getFrameName(frameId)} frame applied to strip!`, 'success');
+    showToast('Frame Applied', `🖼️ ${getFrameName(frameId)} frame applied to strip!`, 'info');
+    playSound('click');
 }
 
 function getFrameName(frameId) {
@@ -200,13 +357,14 @@ function resetEdits() {
     if (sharpnessVal) sharpnessVal.textContent = '100%';
     if (blurVal) blurVal.textContent = '0px';
     
-    showToast('✨ Edits reset', 'success');
+    showToast('Edits Reset', '✨ All editing tools have been reset.', 'info');
+    playSound('click');
 }
 
 // ========== STICKER FUNCTIONS ==========
 function selectPhotoForEditing(photoIndex) {
     if (!photoBoothState.photos[photoIndex]) {
-        showToast('⚠️ No photo in this slot yet! Take photos first.', 'warning');
+        showToast('No Photo', 'No photo in this slot yet! Take photos first.', 'warning');
         return;
     }
     
@@ -218,7 +376,6 @@ function selectPhotoForEditing(photoIndex) {
             if (i === photoIndex) {
                 photoDiv.style.boxShadow = '0 0 0 3px #ffb8d1, 0 0 0 6px white';
                 photoDiv.style.transform = 'scale(1.02)';
-                photoDiv.style.transition = 'all 0.3s ease';
             } else {
                 photoDiv.style.boxShadow = '';
                 photoDiv.style.transform = '';
@@ -231,31 +388,33 @@ function selectPhotoForEditing(photoIndex) {
         infoDiv.innerHTML = `<span class="selected-photo-indicator">✨ Editing Photo ${photoIndex + 1} - Click stickers to add! ✨</span>`;
     }
     
-    showToast(`📸 Selected Photo ${photoIndex + 1} for editing`, 'success');
+    showToast('Photo Selected', `📸 Selected Photo ${photoIndex + 1} for editing`, 'info');
+    playSound('click');
 }
 
 function addSticker(emoji) {
     if (photoBoothState.selectedPhotoIndex === -1) {
-        showToast('⚠️ Click on a photo first to add stickers!', 'warning');
+        showToast('Select Photo', 'Click on a photo first to add stickers!', 'warning');
         return;
     }
     
     if (!photoBoothState.photos[photoBoothState.selectedPhotoIndex]) {
-        showToast('⚠️ No photo in this slot! Take photos first.', 'warning');
+        showToast('No Photo', 'No photo in this slot! Take photos first.', 'warning');
         return;
     }
     
     photoBoothState.stickers[photoBoothState.selectedPhotoIndex].push({
         type: 'emoji',
         emoji: emoji,
-        x: Math.random() * 150 + 20,
-        y: Math.random() * 150 + 20,
-        size: 40,
+        x: Math.random() * 700 + 80,
+        y: Math.random() * 500 + 70,
+        size: 55,
         rotation: Math.random() * 30 - 15
     });
     
     updatePhotoWithStickers();
-    showToast(`✨ Sticker ${emoji} added to Photo ${photoBoothState.selectedPhotoIndex + 1}!`, 'success');
+    showToast('Sticker Added', `✨ Sticker ${emoji} added to Photo ${photoBoothState.selectedPhotoIndex + 1}!`, 'success');
+    playSound('click');
 }
 
 function updatePhotoWithStickers() {
@@ -263,20 +422,14 @@ function updatePhotoWithStickers() {
     if (!photoBoothState.photos[photoBoothState.selectedPhotoIndex]) return;
     
     const canvas = document.createElement('canvas');
-    const quality = qualitySettings[photoBoothState.quality];
-    canvas.width = quality.width;
-    canvas.height = quality.height;
+    canvas.width = 867;
+    canvas.height = 647;
     const ctx = canvas.getContext('2d');
     
     const img = new Image();
     img.onload = () => {
-        // Draw image with mirror effect (flip back because camera already mirrors)
-        ctx.save();
-        ctx.scale(-1, 1);
-        ctx.drawImage(img, -canvas.width, 0, canvas.width, canvas.height);
-        ctx.restore();
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        // Apply stickers
         photoBoothState.stickers[photoBoothState.selectedPhotoIndex].forEach(sticker => {
             ctx.save();
             ctx.translate(sticker.x, sticker.y);
@@ -284,7 +437,6 @@ function updatePhotoWithStickers() {
             
             if (sticker.type === 'emoji') {
                 ctx.font = `${sticker.size}px "Segoe UI Emoji", "Apple Color Emoji"`;
-                ctx.shadowBlur = 0;
                 ctx.fillStyle = '#000';
                 ctx.fillText(sticker.emoji, -sticker.size/2, sticker.size/2);
                 ctx.fillStyle = '#fff';
@@ -298,12 +450,9 @@ function updatePhotoWithStickers() {
             ctx.restore();
         });
         
-        // Update preview
         const slot = document.getElementById(`strip-photo-${photoBoothState.selectedPhotoIndex}`);
         if (slot) {
             slot.style.backgroundImage = `url(${canvas.toDataURL('image/jpeg', 0.95)})`;
-            slot.style.backgroundSize = 'cover';
-            slot.style.backgroundPosition = 'center';
         }
         
         photoBoothState.photosWithStickers[photoBoothState.selectedPhotoIndex] = canvas.toDataURL('image/jpeg', 0.95);
@@ -313,7 +462,7 @@ function updatePhotoWithStickers() {
 
 function clearStickersOnSelectedPhoto() {
     if (photoBoothState.selectedPhotoIndex === -1) {
-        showToast('⚠️ Select a photo first', 'warning');
+        showToast('Select Photo', 'Select a photo first', 'warning');
         return;
     }
     
@@ -323,24 +472,19 @@ function clearStickersOnSelectedPhoto() {
         const slot = document.getElementById(`strip-photo-${photoBoothState.selectedPhotoIndex}`);
         if (slot) {
             slot.style.backgroundImage = `url(${photoBoothState.photos[photoBoothState.selectedPhotoIndex]})`;
-            slot.style.backgroundSize = 'cover';
-            slot.style.backgroundPosition = 'center';
         }
         photoBoothState.photosWithStickers[photoBoothState.selectedPhotoIndex] = photoBoothState.photos[photoBoothState.selectedPhotoIndex];
     }
     
-    showToast(`🗑️ All stickers cleared from Photo ${photoBoothState.selectedPhotoIndex + 1}`, 'success');
+    showToast('Stickers Cleared', `🗑️ All stickers cleared from Photo ${photoBoothState.selectedPhotoIndex + 1}`, 'info');
+    playSound('click');
 }
 
 // ========== CAMERA FUNCTIONS ==========
 async function startCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                width: { ideal: 1920 },
-                height: { ideal: 1080 },
-                facingMode: 'user'
-            } 
+            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } 
         });
         
         const video = document.getElementById('video');
@@ -355,7 +499,7 @@ async function startCamera() {
             }
             const captureBtn = document.getElementById('capture-btn');
             if (captureBtn) captureBtn.disabled = false;
-            showToast('✅ Camera started! Mirror view enabled.', 'success');
+            showToast('Camera Ready', 'Camera started! Mirror view enabled.', 'success');
         };
     } catch (err) {
         console.error('Camera error:', err);
@@ -364,7 +508,7 @@ async function startCamera() {
             statusEl.textContent = '❌ Camera access denied';
             statusEl.style.background = 'rgba(255, 107, 107, 0.9)';
         }
-        showToast('❌ Please allow camera access!', 'error');
+        showToast('Camera Access', 'Please allow camera access to use the photo booth.', 'error');
     }
 }
 
@@ -380,7 +524,7 @@ function stopCamera() {
         }
         const captureBtn = document.getElementById('capture-btn');
         if (captureBtn) captureBtn.disabled = true;
-        showToast('⏹️ Camera stopped', 'info');
+        showToast('Camera Stopped', 'Camera has been stopped.', 'info');
     }
 }
 
@@ -388,12 +532,12 @@ function stopCamera() {
 function startPhotoStrip() {
     const video = document.getElementById('video');
     if (!video || !video.srcObject) {
-        showToast('❌ Start camera first!', 'error');
+        showToast('Start Camera', 'Start camera first!', 'error');
         return;
     }
     
     if (photoBoothState.capturing) {
-        showToast('⚠️ Already capturing!', 'warning');
+        showToast('Already Capturing', 'Already capturing photos!', 'warning');
         return;
     }
     
@@ -445,10 +589,12 @@ function captureNextPhoto() {
     
     let count = 3;
     countdown.textContent = count;
+    playSound('countdown');
     
     const timer = setInterval(() => {
         count--;
         countdown.textContent = count;
+        playSound('countdown');
         
         if (count === 0) {
             clearInterval(timer);
@@ -471,62 +617,41 @@ function takeStripPhoto() {
     
     const ctx = canvas.getContext('2d');
     
-    // Use quality settings for resolution
-    const quality = qualitySettings[photoBoothState.quality];
-    canvas.width = quality.width;
-    canvas.height = quality.height;
+    canvas.width = 867;
+    canvas.height = 647;
     
-    // Build filter string
     let filterString = '';
     filterString += `brightness(${photoBoothState.editingTools.brightness}%) `;
     filterString += `contrast(${photoBoothState.editingTools.contrast}%) `;
     
-    // Sharpness simulation using convolution (simple contrast enhancement)
     if (photoBoothState.editingTools.sharpness > 100) {
         filterString += `contrast(${photoBoothState.editingTools.sharpness}%) `;
     }
     filterString += `blur(${photoBoothState.editingTools.blur}px) `;
     
-    // Apply selected filter
     switch(photoBoothState.currentFilter) {
-        case 'grayscale':
-            filterString += 'grayscale(100%)';
-            break;
-        case 'sepia':
-            filterString += 'sepia(100%)';
-            break;
-        case 'pink':
-            filterString += 'hue-rotate(320deg) saturate(150%) brightness(105%)';
-            break;
-        case 'purple':
-            filterString += 'hue-rotate(280deg) saturate(150%) brightness(105%)';
-            break;
-        case 'warm':
-            filterString += 'sepia(30%) brightness(110%) contrast(105%)';
-            break;
-        default:
-            break;
+        case 'grayscale': filterString += 'grayscale(100%)'; break;
+        case 'sepia': filterString += 'sepia(100%)'; break;
+        case 'pink': filterString += 'hue-rotate(320deg) saturate(150%) brightness(105%)'; break;
+        case 'purple': filterString += 'hue-rotate(280deg) saturate(150%) brightness(105%)'; break;
+        case 'warm': filterString += 'sepia(30%) brightness(110%) contrast(105%)'; break;
+        default: break;
     }
     
     ctx.filter = filterString;
     
-    // Draw video frame with MIRROR effect (flip horizontally to match preview)
     ctx.save();
     ctx.scale(-1, 1);
     ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
     ctx.restore();
     
-    // Save with high quality JPEG
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
     photoBoothState.photos.push(imgData);
     photoBoothState.photosWithStickers.push(imgData);
     
-    // Update slot preview
     const slot = document.getElementById(`strip-photo-${photoBoothState.currentSlot}`);
     if (slot) {
         slot.style.backgroundImage = `url(${imgData})`;
-        slot.style.backgroundSize = 'cover';
-        slot.style.backgroundPosition = 'center';
         slot.innerHTML = '';
         slot.classList.remove('empty');
         slot.classList.add('filled');
@@ -536,7 +661,6 @@ function takeStripPhoto() {
         })(photoBoothState.currentSlot);
     }
     
-    // Flash effect
     const videoContainer = document.querySelector('.video-container');
     if (videoContainer) {
         videoContainer.style.animation = 'cameraFlash 0.3s ease';
@@ -545,160 +669,244 @@ function takeStripPhoto() {
         }, 300);
     }
     
-    addCoins(3);
+    playSound('shutter');
 }
 
 function finishPhotoStrip() {
     photoBoothState.capturing = false;
     
     const saveBtn = document.getElementById('save-strip-btn');
-    if (saveBtn) saveBtn.disabled = false;
+    if (saveBtn) {
+        saveBtn.disabled = false;
+    }
     
     const infoDiv = document.getElementById('selected-photo-info');
     if (infoDiv) {
-        infoDiv.innerHTML = `<span class="selected-photo-indicator">🎉 4 photos taken! Click any photo to add stickers, then click Save to Gallery!</span>`;
+        infoDiv.innerHTML = `<span class="selected-photo-indicator">🎉 4 photos taken! Click "Save to Gallery" button below!</span>`;
     }
     
-    showToast('🎞️ 4 photos taken! Click any photo to add stickers, then Save to Gallery!', 'success');
+    showToast('Photos Ready', '🎞️ 4 photos taken! Click "Save to Gallery" button!', 'success');
     createConfetti();
+    playSound('success');
 }
 
+// ========== SAVE PHOTO STRIP ==========
 function savePhotoStrip() {
     if (photoBoothState.photos.length === 0) {
-        showToast('❌ No photos to save! Take photos first!', 'error');
+        showToast('No Photos', 'Take some photos first before saving!', 'warning');
         return;
     }
     
-    createAndSaveFinalStrip();
-}
-
-function createAndSaveFinalStrip() {
+    if (photoBoothState.photos.length < 4) {
+        showToast('Incomplete', `Need 4 photos to save. You have ${photoBoothState.photos.length}.`, 'warning');
+        return;
+    }
+    
+    showProgressToast('Saving to Gallery', 'Preparing your photo strip...');
+    updateProgressToast(5, 'Starting...');
+    
+    const saveBtn = document.getElementById('save-strip-btn');
+    if (saveBtn) saveBtn.disabled = true;
+    
     const stripCanvas = document.getElementById('strip-canvas');
-    if (!stripCanvas) return;
+    if (!stripCanvas) {
+        showToast('Error', 'Canvas not found. Please refresh.', 'error');
+        return;
+    }
     
     const ctx = stripCanvas.getContext('2d');
     
-    // 2 inches wide = 192px, 6 inches tall = 576px (at 96 DPI)
-    // Using high quality - 2x size for better resolution (384x1152)
-    const photoSize = 384;  // 4 inches at 96 DPI
-    const padding = 16;
+    const stripWidth = 1000;
+    const stripHeight = 3000;
+    const photoWidth = 867;
+    const photoHeight = 647;
+    const startX = (stripWidth - photoWidth) / 2;
+    const startY = 80;
+    const spacing = 60;
     
-    stripCanvas.width = photoSize + padding * 2;
-    stripCanvas.height = (photoSize * 4) + (padding * 5);
+    stripCanvas.width = stripWidth;
+    stripCanvas.height = stripHeight;
     
-    // Background
-    ctx.fillStyle = '#f8f8f8';
-    ctx.fillRect(0, 0, stripCanvas.width, stripCanvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, stripWidth, stripHeight);
     
-    const finalPhotos = [];
-    let loadCount = 0;
+    updateProgressToast(15, 'Loading your photos...');
     
-    for (let i = 0; i < 4; i++) {
-        const sourcePhoto = photoBoothState.photosWithStickers[i] || photoBoothState.photos[i];
-        if (sourcePhoto) {
-            finalPhotos.push(sourcePhoto);
-        }
-    }
+    let loadedCount = 0;
+    const totalPhotos = photoBoothState.photos.length;
     
-    finalPhotos.forEach((photo, index) => {
+    for (let i = 0; i < totalPhotos; i++) {
+        const photoData = photoBoothState.photos[i];
+        const y = startY + i * (photoHeight + spacing);
+        
         const img = new Image();
-        img.onload = () => {
-            const y = padding + (index * (photoSize + padding));
-            ctx.drawImage(img, padding, y, photoSize, photoSize);
-            loadCount++;
-            
-            if (loadCount === finalPhotos.length) {
-                applyFrameToStrip(ctx, stripCanvas.width, stripCanvas.height, photoSize, padding);
+        img.onload = (function(index, yPos) {
+            return function() {
+                ctx.drawImage(img, startX, yPos, photoWidth, photoHeight);
+                loadedCount++;
+                const progress = 15 + Math.floor((loadedCount / totalPhotos) * 45);
+                updateProgressToast(progress, `Adding photo ${index + 1} of ${totalPhotos}...`);
                 
-                const finalImage = stripCanvas.toDataURL('image/png');
-                gameState.lastPhoto = finalImage;
-                
-                if (!gameState.photos) {
-                    gameState.photos = [];
+                if (loadedCount === totalPhotos) {
+                    updateProgressToast(65, 'Applying effects...');
+                    
+                    if (photoBoothState.currentFrame !== 'none') {
+                        applySimpleFrame(ctx, stripWidth, stripHeight);
+                    }
+                    
+                    updateProgressToast(75, 'Compressing image...');
+                    const finalImage = stripCanvas.toDataURL('image/jpeg', 0.7);
+                    
+                    updateProgressToast(80, 'Loading your gallery...');
+                    
+                    let existingPhotos = [];
+                    try {
+                        const saved = localStorage.getItem('matchAndSnap');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            if (parsed.photos && Array.isArray(parsed.photos)) {
+                                existingPhotos = parsed.photos;
+                            }
+                        }
+                    } catch(e) {}
+                    
+                    const cleanPhoto = {
+                        id: Date.now(),
+                        data: finalImage,
+                        filter: String(photoBoothState.currentFilter || 'normal'),
+                        frame: String(photoBoothState.currentFrame || 'none'),
+                        date: new Date().toLocaleString(),
+                        coins: 0
+                    };
+                    
+                    existingPhotos.unshift(cleanPhoto);
+                    
+                    if (existingPhotos.length > 10) {
+                        existingPhotos = existingPhotos.slice(0, 10);
+                    }
+                    
+                    const saveData = {
+                        coins: (gameState && gameState.coins) ? gameState.coins : 0,
+                        unlockedItems: (gameState && gameState.unlockedItems) ? gameState.unlockedItems : ['normal', 'none'],
+                        photos: existingPhotos,
+                        avatar: (gameState && gameState.avatar) ? gameState.avatar : '👧',
+                        achievements: (gameState && gameState.achievements) ? gameState.achievements : {}
+                    };
+                    
+                    updateProgressToast(90, 'Saving to storage...');
+                    
+                    try {
+                        localStorage.setItem('matchAndSnap', JSON.stringify(saveData));
+                        
+                        if (gameState) gameState.photos = existingPhotos;
+                        
+                        updateProgressToast(100, 'Complete!');
+                        
+                        setTimeout(() => {
+                            closeProgressToast();
+                            showToast('Success!', 'Your photo strip has been saved to the gallery!', 'success', 2500);
+                            playSound('success');
+                            
+                            setTimeout(() => {
+                                window.location.href = 'gallery.html';
+                            }, 1500);
+                        }, 500);
+                        
+                    } catch(e) {
+                        closeProgressToast();
+                        showToast('Storage Full', 'Your gallery is full. Please clear some old photos first.', 'error');
+                        if (saveBtn) saveBtn.disabled = false;
+                    }
                 }
-                
-                const newPhoto = {
-                    id: Date.now(),
-                    data: finalImage,
-                    filter: photoBoothState.currentFilter,
-                    frame: photoBoothState.currentFrame,
-                    date: new Date().toLocaleString(),
-                    coins: 12,
-                    quality: photoBoothState.quality
-                };
-                
-                gameState.photos.unshift(newPhoto);
-                
-                if (gameState.photos.length > 20) {
-                    gameState.photos.pop();
-                }
-                
-                addCoins(12);
-                saveProgress();
-                
-                showToast('✅ Photo strip saved to gallery! High quality saved!', 'success');
-                
-                // Reset for next session
-                photoBoothState.photos = [];
-                photoBoothState.photosWithStickers = [];
-                photoBoothState.stickers = [[], [], [], []];
-                photoBoothState.selectedPhotoIndex = -1;
-            }
+            };
+        })(i, y);
+        
+        img.onerror = function() { 
+            loadedCount++;
         };
-        img.src = photo;
-    });
+        img.src = photoData;
+    }
 }
 
-function applyFrameToStrip(ctx, width, height, photoSize, padding) {
-    switch(photoBoothState.currentFrame) {
+function applySimpleFrame(ctx, width, height) {
+    const frameType = photoBoothState.currentFrame;
+    
+    switch(frameType) {
         case 'polaroid':
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
             ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = '#999';
+            ctx.font = 'bold 16px "Quicksand"';
+            ctx.fillText('🌸 Match & Snap', width/2 - 80, height - 30);
             break;
         case 'film':
             ctx.fillStyle = '#ffd700';
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 45; i++) {
                 ctx.beginPath();
-                ctx.arc(padding - 8, 15 + i * 60, 4, 0, Math.PI * 2);
+                ctx.arc(25, 30 + i * 70, 5, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(padding + photoSize + 8, 15 + i * 60, 4, 0, Math.PI * 2);
+                ctx.arc(width - 25, 30 + i * 70, 5, 0, Math.PI * 2);
                 ctx.fill();
             }
             break;
         case 'hearts':
-            ctx.font = '28px "Segoe UI Emoji"';
+            ctx.font = '40px "Segoe UI Emoji"';
             ctx.fillStyle = '#ff6b8a';
-            ctx.fillText('❤️', 10, 35);
-            ctx.fillText('❤️', width - 45, 35);
-            ctx.fillText('❤️', 10, height - 20);
-            ctx.fillText('❤️', width - 45, height - 20);
+            ctx.fillText('❤️', 30, 60);
+            ctx.fillText('❤️', width - 80, 60);
+            ctx.fillText('❤️', 30, height - 40);
+            ctx.fillText('❤️', width - 80, height - 40);
             break;
         case 'flowers':
-            ctx.font = '28px "Segoe UI Emoji"';
+            ctx.font = '40px "Segoe UI Emoji"';
             ctx.fillStyle = '#ffb8d1';
-            ctx.fillText('🌸', 10, 35);
-            ctx.fillText('🌸', width - 45, 35);
-            ctx.fillText('🌸', 10, height - 20);
-            ctx.fillText('🌸', width - 45, height - 20);
+            ctx.fillText('🌸', 30, 60);
+            ctx.fillText('🌸', width - 80, 60);
+            ctx.fillText('🌸', 30, height - 40);
+            ctx.fillText('🌸', width - 80, height - 40);
             break;
         case 'stars':
-            ctx.font = '28px "Segoe UI Emoji"';
+            ctx.font = '40px "Segoe UI Emoji"';
             ctx.fillStyle = '#ffd700';
-            ctx.fillText('⭐', 10, 35);
-            ctx.fillText('⭐', width - 45, 35);
-            ctx.fillText('⭐', 10, height - 20);
-            ctx.fillText('⭐', width - 45, height - 20);
+            ctx.fillText('⭐', 30, 60);
+            ctx.fillText('⭐', width - 80, 60);
+            ctx.fillText('⭐', 30, height - 40);
+            ctx.fillText('⭐', width - 80, height - 40);
             break;
     }
 }
 
-// Add camera flash animation
+function createConfetti() {
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.cssText = `
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: hsl(${Math.random() * 360}, 100%, 70%);
+            left: ${Math.random() * 100}vw;
+            top: -10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confettiFall ${Math.random() * 2 + 1}s linear forwards;
+        `;
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3000);
+    }
+}
+
 const flashStyle = document.createElement('style');
 flashStyle.textContent = `
     @keyframes cameraFlash {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.3; background: white; }
     }
+    @keyframes confettiFall {
+        to { transform: translateY(100vh) rotate(720deg); }
+    }
 `;
 document.head.appendChild(flashStyle);
+
+window.savePhotoStrip = savePhotoStrip;

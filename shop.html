@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌸 Match & Snap - Cute Shop</title>
+    <title>🌸 Match & Snap - About</title>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -15,102 +15,508 @@
     <link rel="stylesheet" href="css/style.css">
     
     <style>
-        .shop-category {
-            margin-bottom: 50px;
+        /* About Page - Chic Minimalist */
+        .about-page {
+            background: #f8f6f4;
+            min-height: 100vh;
         }
         
-        .shop-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+        .about-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 50px 30px;
         }
         
-        .shop-item {
-            background: white;
-            padding: 25px;
-            border-radius: 25px;
+        /* Hero Section */
+        .about-hero {
             text-align: center;
-            cursor: pointer;
+            margin-bottom: 70px;
+        }
+        
+        .about-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4em;
+            font-weight: 500;
+            color: #2c2c2c;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
+        }
+        
+        .about-hero .subtitle {
+            font-family: 'Inter', sans-serif;
+            color: #8a7a7a;
+            font-size: 1.1em;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .hero-divider {
+            width: 50px;
+            height: 2px;
+            background: #d4c4c4;
+            margin: 25px auto 0;
+        }
+        
+        /* Story Section */
+        .story-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 70px;
+            align-items: center;
+        }
+        
+        .story-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            font-weight: 500;
+            color: #2c2c2c;
+            margin-bottom: 20px;
+            letter-spacing: -0.01em;
+        }
+        
+        .story-content p {
+            font-family: 'Inter', sans-serif;
+            color: #6a6a6a;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+        
+        .story-image {
+            background: #f0ece8;
+            border-radius: 30px;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5em;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .story-image::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(212,196,196,0.1) 0%, transparent 70%);
+        }
+        
+        /* Mission Section */
+        .mission-section {
+            background: white;
+            border-radius: 30px;
+            padding: 50px;
+            margin-bottom: 70px;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.02);
+            border: 1px solid #eee8e5;
+        }
+        
+        .mission-icon {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        
+        .mission-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            font-weight: 500;
+            color: #2c2c2c;
+            margin-bottom: 20px;
+        }
+        
+        .mission-section p {
+            font-family: 'Inter', sans-serif;
+            color: #6a6a6a;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 0.95em;
+        }
+        
+        /* Creator Card */
+        .creator-card {
+            display: flex;
+            gap: 40px;
+            background: white;
+            border-radius: 30px;
+            padding: 45px;
+            margin-bottom: 70px;
+            border: 1px solid #eee8e5;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
-            box-shadow: 0 8px 20px rgba(255, 184, 209, 0.3);
         }
         
-        .shop-item:hover {
-            transform: translateY(-10px);
-            border-color: #ffb8d1;
-            box-shadow: 0 15px 30px rgba(255, 184, 209, 0.5);
+        .creator-card:hover {
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
         }
         
-        .shop-item.unlocked {
-            background: linear-gradient(135deg, #a8e6cf, #d4edda);
-            cursor: default;
+        .creator-avatar {
+            width: 120px;
+            height: 120px;
+            background: #f0ece8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5em;
+            flex-shrink: 0;
         }
         
-        .shop-item.unlocked:hover {
-            transform: none;
-        }
-        
-        .item-icon {
-            font-size: 3em;
+        .creator-info h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            font-weight: 500;
+            color: #2c2c2c;
             margin-bottom: 15px;
         }
         
-        .item-name {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .creator-info p {
+            font-family: 'Inter', sans-serif;
+            color: #6a6a6a;
+            line-height: 1.7;
+            font-size: 0.95em;
         }
         
-        .item-price {
-            color: #ffb8d1;
-            font-weight: bold;
-            font-size: 1.3em;
-            margin: 15px 0;
+        .creator-signature {
+            margin-top: 20px;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #b8a8a8;
         }
         
-        .owned-badge {
+        /* Features Grid */
+        .features-section {
+            margin-bottom: 70px;
+        }
+        
+        .features-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            font-weight: 500;
+            color: #2c2c2c;
+            text-align: center;
+            margin-bottom: 45px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 30px 20px;
             background: white;
-            color: #4caf50;
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
-            font-weight: bold;
-        }
-        
-        .buy-btn {
-            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
+            border-radius: 24px;
+            border: 1px solid #eee8e5;
             transition: all 0.3s ease;
         }
         
-        .buy-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 184, 209, 0.5);
+        .feature-item:hover {
+            transform: translateY(-5px);
+            border-color: #d4c4c4;
         }
         
-        .buy-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .feature-icon {
+            width: 65px;
+            height: 65px;
+            background: #f8f6f4;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            margin: 0 auto 20px;
         }
         
-        .coins-display {
-            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
-            color: white;
-            padding: 20px;
-            border-radius: 25px;
+        .feature-item h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em;
+            font-weight: 500;
+            color: #2c2c2c;
+            margin-bottom: 10px;
+        }
+        
+        .feature-item p {
+            font-family: 'Inter', sans-serif;
+            color: #8a7a7a;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        
+        /* Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 70px;
             text-align: center;
+        }
+        
+        .stat-item {
+            padding: 25px;
+        }
+        
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #2c2c2c;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-family: 'Inter', sans-serif;
+            color: #8a7a7a;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Testimonials */
+        .testimonials-section {
+            margin-bottom: 70px;
+        }
+        
+        .testimonials-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2em;
+            font-weight: 500;
+            color: #2c2c2c;
+            text-align: center;
+            margin-bottom: 45px;
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .testimonial-card {
+            background: white;
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid #eee8e5;
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .testimonial-rating {
+            color: #c4b4b4;
+            font-size: 0.8em;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+        
+        .testimonial-text {
+            font-family: 'Inter', sans-serif;
+            color: #6a6a6a;
+            line-height: 1.7;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .testimonial-avatar {
+            width: 40px;
+            height: 40px;
+            background: #f0ece8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+        
+        .testimonial-name {
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            color: #2c2c2c;
+            font-size: 0.85em;
+        }
+        
+        .testimonial-title {
+            font-family: 'Inter', sans-serif;
+            color: #a89a9a;
+            font-size: 0.7em;
+        }
+        
+        /* Contact Section */
+        .contact-section {
+            background: #2c2c2c;
+            border-radius: 30px;
+            padding: 50px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .contact-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            font-weight: 500;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .contact-section p {
+            font-family: 'Inter', sans-serif;
+            color: #b8a8a8;
             margin-bottom: 30px;
-            font-size: 1.5em;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 35px;
+        }
+        
+        .social-link {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .social-link:hover {
+            background: #c4b4b4;
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            font-family: 'Inter', sans-serif;
+            color: #8a7a7a;
+            font-size: 0.75em;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Back to Top */
+        .back-to-top {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-to-top-btn {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: 1px solid #eee8e5;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #b8a8a8;
+            font-size: 1.1em;
+        }
+        
+        .back-to-top-btn:hover {
+            background: #2c2c2c;
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        /* Sound Toggle */
+        .sound-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            z-index: 100;
+            border: 1px solid #eee8e5;
+        }
+        
+        .sound-toggle:hover {
+            transform: scale(1.1);
+            background: #f8f6f4;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .story-section {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .creator-card {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .creator-avatar {
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .about-hero h1 {
+                font-size: 2.8em;
+            }
+            
+            .mission-section,
+            .creator-card {
+                padding: 30px;
+            }
         }
     </style>
 </head>
-<body>
+<body class="about-page">
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">
@@ -121,10 +527,10 @@
             <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
             <a href="game.html" class="nav-link"><i class="fas fa-gamepad"></i> Game</a>
             <a href="photobooth.html" class="nav-link"><i class="fas fa-camera"></i> Photo Booth</a>
-            <a href="shop.html" class="nav-link active"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="shop.html" class="nav-link"><i class="fas fa-shopping-bag"></i> Shop</a>
             <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i> Gallery</a>
             <a href="achievements.html" class="nav-link"><i class="fas fa-trophy"></i> Achievements</a>
-            <a href="about.html" class="nav-link"><i class="fas fa-heart"></i> About</a>
+            <a href="about.html" class="nav-link active"><i class="fas fa-heart"></i> About</a>
         </div>
         
         <div class="user-section">
@@ -138,46 +544,170 @@
         </div>
     </nav>
 
-    <!-- Shop Container -->
-    <div class="shop-container">
-        <h1 class="section-title">🛍️ Cute Shop 🛍️</h1>
-        
-        <!-- Coins Display -->
-        <div class="coins-display">
-            <i class="fas fa-star"></i> Your Coins: <span id="shop-coins">0</span>
+    <!-- About Container -->
+    <div class="about-container">
+        <!-- Hero Section -->
+        <div class="about-hero">
+            <h1>The Story Behind<br>Match & Snap</h1>
+            <div class="hero-divider"></div>
+            <p class="subtitle">Where memory meets creativity, and every moment becomes a keepsake.</p>
         </div>
 
-        <!-- Filters Category -->
-        <div class="shop-category">
-            <h2 class="section-title" style="font-size: 2em;">🎨 Cute Filters</h2>
-            <div id="filters-grid" class="shop-grid">
-                <!-- Will be populated by JavaScript -->
+        <!-- Story Section -->
+        <div class="story-section">
+            <div class="story-content">
+                <h2>Our Beginning</h2>
+                <p>Match & Snap was born from a simple observation — the most joyful digital experiences combine play with creativity. What started as a university project evolved into a passion project dedicated to bringing smiles through pixel-perfect memories.</p>
+                <p>Every feature, from the satisfying card flips to the delicate photo filters, is crafted with intention. We believe that technology should feel warm, not cold — and that creative tools should be accessible to everyone.</p>
+            </div>
+            <div class="story-image">
+                🌸
             </div>
         </div>
 
-        <!-- Frames Category -->
-        <div class="shop-category">
-            <h2 class="section-title" style="font-size: 2em;">🖼️ Pretty Frames</h2>
-            <div id="frames-grid" class="shop-grid">
-                <!-- Will be populated by JavaScript -->
+        <!-- Mission Section -->
+        <div class="mission-section">
+            <div class="mission-icon">✨</div>
+            <h2>Our Mission</h2>
+            <p>To create a digital space where playfulness and aesthetics coexist — a place where you can challenge your memory, express your creativity, and collect moments that make you smile.</p>
+        </div>
+
+        <!-- Creator Card -->
+        <div class="creator-card">
+            <div class="creator-avatar">
+                👩‍🎨
+            </div>
+            <div class="creator-info">
+                <h2>Meet the Creator</h2>
+                <p>I'm a designer and developer who believes that the web should be beautiful, intuitive, and delightful. Match & Snap is my love letter to thoughtful design — a project where every animation, every color, and every interaction has been carefully considered.</p>
+                <p>When I'm not coding, you'll find me sketching, collecting vintage postcards, or exploring quiet cafes. I hope this little corner of the internet brings you as much joy as it brought me to create it.</p>
+                <div class="creator-signature">— with warmth, from Amsterdam</div>
             </div>
         </div>
 
-        <!-- Avatars Category -->
-        <div class="shop-category">
-            <h2 class="section-title" style="font-size: 2em;">👧 Adorable Avatars</h2>
-            <div id="avatars-grid" class="shop-grid">
-                <!-- Will be populated by JavaScript -->
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2>What's Inside</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🎮</div>
+                    <h3>Memory Game</h3>
+                    <p>Test your recall with beautifully illustrated cards. Each match earns you coins to spend in the shop.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📸</div>
+                    <h3>Photo Booth</h3>
+                    <p>Capture four moments in one strip. Add filters, frames, and stickers to make each one uniquely yours.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🛍️</div>
+                    <h3>The Shop</h3>
+                    <p>Unlock new filters, frames, and avatars with coins you've earned. Every purchase feels like a reward.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Achievements</h3>
+                    <p>Track your progress and collect badges. Small milestones that make the journey meaningful.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Photo Editor</h3>
+                    <p>Adjust brightness, contrast, and add playful stickers. Your photos, your way.</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🌓</div>
+                    <h3>Dark Mode</h3>
+                    <p>Choose the look that suits your mood. Light and dark themes, both carefully designed.</p>
+                </div>
             </div>
         </div>
 
-        <!-- Stickers Category -->
-        <div class="shop-category">
-            <h2 class="section-title" style="font-size: 2em;">✨ Fun Stickers</h2>
-            <div id="stickers-grid" class="shop-grid">
-                <!-- Will be populated by JavaScript -->
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-number">32+</span>
+                <span class="stat-label">CHARACTERS</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">12</span>
+                <span class="stat-label">FILTERS & FRAMES</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10</span>
+                <span class="stat-label">ACHIEVEMENTS</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">∞</span>
+                <span class="stat-label">MOMENTS OF JOY</span>
             </div>
         </div>
+
+        <!-- Testimonials -->
+        <div class="testimonials-section">
+            <h2>Lovely Words</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">★★★★★</div>
+                    <p class="testimonial-text">"The attention to detail is remarkable. It's rare to find a web experience that feels this thoughtfully crafted."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">⭐</div>
+                        <div>
+                            <div class="testimonial-name">Sarah Chen</div>
+                            <div class="testimonial-title">Product Designer</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">★★★★★</div>
+                    <p class="testimonial-text">"The photo booth feature is surprisingly addictive. I've made dozens of strips just for fun."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">🎨</div>
+                        <div>
+                            <div class="testimonial-name">Marcus Williams</div>
+                            <div class="testimonial-title">Illustrator</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-rating">★★★★★</div>
+                    <p class="testimonial-text">"A beautiful example of what happens when design and functionality work together seamlessly."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">📖</div>
+                        <div>
+                            <div class="testimonial-name">Emma Rodriguez</div>
+                            <div class="testimonial-title">UX Researcher</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h2>Let's Connect</h2>
+            <p>Have a question, suggestion, or just want to share your creations? I'd love to hear from you.</p>
+            <div class="social-links">
+                <a href="#" class="social-link"><i class="fas fa-envelope"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+            </div>
+            <div class="copyright">
+                <p>© 2026 Match & Snap — Designed with care</p>
+            </div>
+        </div>
+
+        <!-- Back to Top -->
+        <div class="back-to-top">
+            <button class="back-to-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" onclick="toggleAboutSound()" id="about-sound-toggle">
+        <i class="fas fa-volume-up"></i>
     </div>
 
     <!-- Toast Container -->
@@ -185,6 +715,53 @@
 
     <!-- Scripts -->
     <script src="js/main.js"></script>
-    <script src="js/shop.js"></script>
+    <script>
+        // ========== ABOUT PAGE SOUND SYSTEM ==========
+        let aboutAudioCtx = null;
+        let aboutSoundEnabled = true;
+
+        function initAboutAudio() {
+            if (!aboutAudioCtx) {
+                aboutAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playAboutSound() {
+            if (!aboutSoundEnabled) return;
+            
+            initAboutAudio();
+            if (aboutAudioCtx.state === 'suspended') {
+                aboutAudioCtx.resume();
+            }
+            
+            const osc = aboutAudioCtx.createOscillator();
+            const gain = aboutAudioCtx.createGain();
+            
+            osc.frequency.value = 500;
+            gain.gain.setValueAtTime(0.1, aboutAudioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, aboutAudioCtx.currentTime + 0.1);
+            
+            osc.connect(gain);
+            gain.connect(aboutAudioCtx.destination);
+            osc.start();
+            osc.stop(aboutAudioCtx.currentTime + 0.15);
+        }
+
+        function toggleAboutSound() {
+            aboutSoundEnabled = !aboutSoundEnabled;
+            const btn = document.getElementById('about-sound-toggle');
+            if (btn) {
+                btn.innerHTML = aboutSoundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+            }
+            playAboutSound();
+        }
+
+        // Initialize audio on first user interaction
+        document.body.addEventListener('click', function initAudio() {
+            if (aboutAudioCtx && aboutAudioCtx.state === 'suspended') {
+                aboutAudioCtx.resume();
+            }
+        }, { once: true });
+    </script>
 </body>
 </html>
