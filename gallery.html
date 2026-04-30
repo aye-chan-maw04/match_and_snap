@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Match & Snap - Gallery</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .gallery-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+        }
+        
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .gallery-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 25px;
+            box-shadow: 0 8px 20px rgba(255, 184, 209, 0.3);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffb8d1;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .gallery-item {
+            background: white;
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(255, 184, 209, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 15px 30px rgba(255, 184, 209, 0.5);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .gallery-item-info {
+            padding: 10px;
+        }
+        
+        .photo-date {
+            color: #6b4e5e;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .photo-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .photo-tag {
+            background: #ffeef5;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: #ffb8d1;
+        }
+        
+        .photo-coins {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 184, 209, 0.9);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .empty-gallery {
+            text-align: center;
+            padding: 60px;
+            background: #ffeef5;
+            border-radius: 35px;
+        }
+        
+        .empty-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        .gallery-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 35px;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .modal-content img {
+            width: 100%;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">🌸 Match & Snap</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="game.html" class="nav-link"><i class="fas fa-gamepad"></i> Game</a>
+            <a href="photobooth.html" class="nav-link"><i class="fas fa-camera"></i> Photo Booth</a>
+            <a href="shop.html" class="nav-link"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="gallery.html" class="nav-link active"><i class="fas fa-images"></i> Gallery</a>
+            <a href="achievements.html" class="nav-link"><i class="fas fa-trophy"></i> Achievements</a>
+            <a href="about.html" class="nav-link"><i class="fas fa-heart"></i> About</a>
+        </div>
+        
+        <div class="user-section">
+            <div class="coin-display">
+                <i class="fas fa-star"></i>
+                <span id="coin-counter">0</span>
+            </div>
+            <div class="avatar" id="avatar-display">
+                👧
+            </div>
+        </div>
+    </nav>
+
+    <!-- Gallery Container -->
+    <div class="gallery-container">
+        <div class="gallery-header">
+            <h1 class="section-title">🖼️ My Cute Gallery 🖼️</h1>
+            <p>All your adorable photo strips in one place!</p>
+        </div>
+
+        <!-- Gallery Stats -->
+        <div class="gallery-stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-photos">0</div>
+                <div>Total Photos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-coins-earned">0</div>
+                <div>Coins Earned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="favorite-filter">-</div>
+                <div>Favorite Filter</div>
+            </div>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div id="gallery-grid" class="gallery-grid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Gallery Controls -->
+        <div class="gallery-controls">
+            <button class="btn btn-primary" onclick="refreshGallery()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button class="btn btn-secondary" onclick="clearGallery()">
+                <i class="fas fa-trash"></i> Clear All
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal for viewing photo -->
+    <div class="modal" id="photo-modal">
+        <div class="modal-content">
+            <img id="modal-image" src="" alt="Photo strip">
+            <h3 id="modal-title"></h3>
+            <p id="modal-date"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="downloadCurrentPhoto()">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/gallery.js"></script>
+</body>
+</html>

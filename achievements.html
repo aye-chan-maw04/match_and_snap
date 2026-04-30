@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Match & Snap - Achievements</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .achievements-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+        }
+        
+        .achievements-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .progress-overview {
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+            padding: 30px;
+            border-radius: 35px;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .progress-stat {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 20px;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+        
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .achievement-card {
+            background: white;
+            padding: 25px;
+            border-radius: 25px;
+            display: flex;
+            gap: 20px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 20px rgba(255, 184, 209, 0.3);
+        }
+        
+        .achievement-card:hover {
+            transform: translateX(10px);
+            border-color: #ffb8d1;
+        }
+        
+        .achievement-card.unlocked {
+            background: linear-gradient(135deg, #a8e6cf, #d4edda);
+        }
+        
+        .achievement-icon {
+            font-size: 2.5em;
+            min-width: 70px;
+            height: 70px;
+            background: #ffeef5;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .achievement-info {
+            flex: 1;
+        }
+        
+        .achievement-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .achievement-desc {
+            color: #6b4e5e;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .achievement-reward {
+            display: inline-block;
+            background: #ffb8d1;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ffeef5;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffb8d1, #e0c3fc);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .badge-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .badge {
+            width: 60px;
+            height: 60px;
+            background: #ffeef5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+        
+        .badge.unlocked {
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+            color: white;
+            animation: badgePulse 2s infinite;
+        }
+        
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">🌸 Match & Snap</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="game.html" class="nav-link"><i class="fas fa-gamepad"></i> Game</a>
+            <a href="photobooth.html" class="nav-link"><i class="fas fa-camera"></i> Photo Booth</a>
+            <a href="shop.html" class="nav-link"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i> Gallery</a>
+            <a href="achievements.html" class="nav-link active"><i class="fas fa-trophy"></i> Achievements</a>
+            <a href="about.html" class="nav-link"><i class="fas fa-heart"></i> About</a>
+        </div>
+        
+        <div class="user-section">
+            <div class="coin-display">
+                <i class="fas fa-star"></i>
+                <span id="coin-counter">0</span>
+            </div>
+            <div class="avatar" id="avatar-display">
+                👧
+            </div>
+        </div>
+    </nav>
+
+    <!-- Achievements Container -->
+    <div class="achievements-container">
+        <div class="achievements-header">
+            <h1 class="section-title">🏆 Cute Achievements 🏆</h1>
+            <p>Complete challenges to earn rewards and badges!</p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="progress-overview">
+            <h2 style="margin-bottom: 20px;">✨ Your Progress</h2>
+            <div class="progress-stats">
+                <div class="progress-stat">
+                    <div class="stat-value" id="achievements-completed">0</div>
+                    <div>Completed</div>
+                </div>
+                <div class="progress-stat">
+                    <div class="stat-value" id="total-rewards">0</div>
+                    <div>Coins Earned</div>
+                </div>
+                <div class="progress-stat">
+                    <div class="stat-value" id="completion-rate">0%</div>
+                    <div>Completion</div>
+                </div>
+            </div>
+            <div class="progress-bar" style="margin-top: 30px;">
+                <div class="progress-fill" id="overall-progress" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- Badges Collection -->
+        <div style="margin: 40px 0;">
+            <h2 class="section-title" style="font-size: 2em;">🎖️ Your Badges</h2>
+            <div class="badge-container" id="badge-container">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Achievements Grid -->
+        <div id="achievements-grid" class="achievements-grid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Reset Progress Button -->
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="btn btn-secondary" onclick="resetAchievements()">
+                <i class="fas fa-undo"></i> Reset Progress
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/achievements.js"></script>
+</body>
+</html>

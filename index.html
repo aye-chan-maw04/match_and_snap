@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Match & Snap - Home</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">🌸 Match & Snap</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link active"><i class="fas fa-home"></i> Home</a>
+            <a href="game.html" class="nav-link"><i class="fas fa-gamepad"></i> Game</a>
+            <a href="photobooth.html" class="nav-link"><i class="fas fa-camera"></i> Photo Booth</a>
+            <a href="shop.html" class="nav-link"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i> Gallery</a>
+            <a href="achievements.html" class="nav-link"><i class="fas fa-trophy"></i> Achievements</a>
+            <a href="about.html" class="nav-link"><i class="fas fa-heart"></i> About</a>
+        </div>
+        
+        <div class="user-section">
+            <div class="coin-display">
+                <i class="fas fa-star"></i>
+                <span id="coin-counter">0</span>
+            </div>
+            <div class="avatar" id="avatar-display">
+                👧
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">🌸 Welcome to Match & Snap! 🌸</h1>
+            <p class="hero-subtitle">The cutest memory game and photo booth with Hirono characters!</p>
+            <div class="hero-buttons">
+                <a href="game.html" class="btn btn-primary">
+                    <i class="fas fa-gamepad"></i> Play Now
+                </a>
+                <a href="photobooth.html" class="btn btn-secondary">
+                    <i class="fas fa-camera"></i> Take Photos
+                </a>
+            </div>
+        </div>
+        
+        <div class="hero-images">
+            <!-- Replace with your Hirono character images -->
+            <img src="images/characters/hirono1.jpg" alt="Hirono Character" class="floating-character character-1">
+            <img src="images/characters/hirono2.jpg" alt="Hirono Character" class="floating-character character-2">
+            <img src="images/characters/hirono3.jpg" alt="Hirono Character" class="floating-character character-3">
+            <img src="images/characters/hirono4.jpg" alt="Hirono Character" class="floating-character character-4">
+            <img src="images/characters/hirono5.jpg" alt="Hirono Character" class="floating-character character-5">
+            <img src="images/characters/hirono6.jpg" alt="Hirono Character" class="floating-character character-6">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2 class="section-title">✨ What's So Cute About Us? ✨</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3>Memory Game</h3>
+                <p>Match adorable Hirono characters and earn coins!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <h3>Photo Strip</h3>
+                <p>Create cute 4-photo strips with your favorite characters!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🛍️</div>
+                <h3>Cute Shop</h3>
+                <p>Unlock filters, frames, and avatars with your coins!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Achievements</h3>
+                <p>Complete challenges and earn special rewards!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="features" style="background: white;">
+        <h2 class="section-title">🎀 How To Play 🎀</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto;">
+            <div class="feature-card" style="background: var(--bg-soft);">
+                <h3 style="font-size: 2em; color: var(--primary-pink);">1</h3>
+                <h4>Play Memory Game</h4>
+                <p>Match pairs of Hirono characters to earn coins</p>
+            </div>
+            
+            <div class="feature-card" style="background: var(--bg-soft);">
+                <h3 style="font-size: 2em; color: var(--primary-pink);">2</h3>
+                <h4>Visit the Shop</h4>
+                <p>Spend coins on cute filters & frames</p>
+            </div>
+            
+            <div class="feature-card" style="background: var(--bg-soft);">
+                <h3 style="font-size: 2em; color: var(--primary-pink);">3</h3>
+                <h4>Take Photos</h4>
+                <p>Create adorable photo strips</p>
+            </div>
+            
+            <div class="feature-card" style="background: var(--bg-soft);">
+                <h3 style="font-size: 2em; color: var(--primary-pink);">4</h3>
+                <h4>Collect & Share</h4>
+                <p>Save your creations and earn achievements</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Daily Bonus -->
+    <section style="padding: 50px; text-align: center;">
+        <div style="background: linear-gradient(135deg, var(--primary-pink), var(--primary-lavender)); padding: 40px; border-radius: var(--border-radius-large); color: white; max-width: 800px; margin: 0 auto;">
+            <h2 style="font-family: 'Dancing Script', cursive; font-size: 2.5em;">🎁 Daily Bonus! 🎁</h2>
+            <p style="font-size: 1.2em; margin: 20px 0;">Come back every day for 100 free coins!</p>
+            <button class="btn btn-secondary" onclick="claimDailyBonus()" style="background: white; color: var(--primary-pink);">
+                <i class="fas fa-gift"></i> Claim Now
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--bg-soft); padding: 30px; text-align: center; margin-top: 50px;">
+        <p style="color: var(--text-soft);">🌸 Made with love for Hirono fans 🌸</p>
+        <p style="color: var(--text-soft); font-size: 0.9em;">© 2026 Match & Snap - All rights reserved</p>
+    </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+</body>
+</html>

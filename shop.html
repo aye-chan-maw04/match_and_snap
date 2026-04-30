@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Match & Snap - Cute Shop</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .shop-category {
+            margin-bottom: 50px;
+        }
+        
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .shop-item {
+            background: white;
+            padding: 25px;
+            border-radius: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 8px 20px rgba(255, 184, 209, 0.3);
+        }
+        
+        .shop-item:hover {
+            transform: translateY(-10px);
+            border-color: #ffb8d1;
+            box-shadow: 0 15px 30px rgba(255, 184, 209, 0.5);
+        }
+        
+        .shop-item.unlocked {
+            background: linear-gradient(135deg, #a8e6cf, #d4edda);
+            cursor: default;
+        }
+        
+        .shop-item.unlocked:hover {
+            transform: none;
+        }
+        
+        .item-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .item-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .item-price {
+            color: #ffb8d1;
+            font-weight: bold;
+            font-size: 1.3em;
+            margin: 15px 0;
+        }
+        
+        .owned-badge {
+            background: white;
+            color: #4caf50;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        
+        .buy-btn {
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .buy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 184, 209, 0.5);
+        }
+        
+        .buy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .coins-display {
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+            color: white;
+            padding: 20px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">🌸 Match & Snap</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="game.html" class="nav-link"><i class="fas fa-gamepad"></i> Game</a>
+            <a href="photobooth.html" class="nav-link"><i class="fas fa-camera"></i> Photo Booth</a>
+            <a href="shop.html" class="nav-link active"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i> Gallery</a>
+            <a href="achievements.html" class="nav-link"><i class="fas fa-trophy"></i> Achievements</a>
+            <a href="about.html" class="nav-link"><i class="fas fa-heart"></i> About</a>
+        </div>
+        
+        <div class="user-section">
+            <div class="coin-display">
+                <i class="fas fa-star"></i>
+                <span id="coin-counter">0</span>
+            </div>
+            <div class="avatar" id="avatar-display">
+                👧
+            </div>
+        </div>
+    </nav>
+
+    <!-- Shop Container -->
+    <div class="shop-container">
+        <h1 class="section-title">🛍️ Cute Shop 🛍️</h1>
+        
+        <!-- Coins Display -->
+        <div class="coins-display">
+            <i class="fas fa-star"></i> Your Coins: <span id="shop-coins">0</span>
+        </div>
+
+        <!-- Filters Category -->
+        <div class="shop-category">
+            <h2 class="section-title" style="font-size: 2em;">🎨 Cute Filters</h2>
+            <div id="filters-grid" class="shop-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Frames Category -->
+        <div class="shop-category">
+            <h2 class="section-title" style="font-size: 2em;">🖼️ Pretty Frames</h2>
+            <div id="frames-grid" class="shop-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Avatars Category -->
+        <div class="shop-category">
+            <h2 class="section-title" style="font-size: 2em;">👧 Adorable Avatars</h2>
+            <div id="avatars-grid" class="shop-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Stickers Category -->
+        <div class="shop-category">
+            <h2 class="section-title" style="font-size: 2em;">✨ Fun Stickers</h2>
+            <div id="stickers-grid" class="shop-grid">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/shop.js"></script>
+</body>
+</html>

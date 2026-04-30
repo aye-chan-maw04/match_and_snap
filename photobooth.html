@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Match & Snap - Photo Booth</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .photobooth-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .camera-section {
+            background: var(--bg-light);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .video-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: #333;
+        }
+        
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Mirror effect - flip horizontally */
+            transform: scaleX(-1);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            z-index: 10;
+        }
+        
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            z-index: 20;
+            animation: countdownPulse 1s infinite;
+        }
+        
+        @keyframes countdownPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        /* Quality Settings Panel */
+        .quality-settings {
+            background: linear-gradient(145deg, #f5e6f0, #ffe4e8);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .quality-settings h4 {
+            margin-bottom: 10px;
+            color: #ff6b8a;
+        }
+        
+        .quality-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .quality-btn {
+            padding: 5px 15px;
+            border: 2px solid #ffb8d1;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+        
+        .quality-btn.active {
+            background: #ffb8d1;
+            color: white;
+        }
+        
+        /* 2x6 Inch Strip Container */
+        .strip-container {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .strip-photo {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #f0f0f0;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .strip-photo.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            color: #bbb;
+            background: linear-gradient(145deg, #f5f5f5, #e8e8e8);
+        }
+        
+        .strip-photo.filled {
+            animation: photoPop 0.4s ease;
+        }
+        
+        .strip-photo:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 2px #ffb8d1;
+        }
+        
+        @keyframes photoPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Frame styles */
+        .strip-container.polaroid {
+            background: white;
+            padding: 10px 10px 25px 10px;
+            position: relative;
+            max-width: 220px;
+        }
+        
+        .strip-container.polaroid .strip-photo {
+            border-bottom: none;
+        }
+        
+        .strip-container.polaroid::after {
+            content: '🌸 Match & Snap';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: #999;
+            font-family: 'Quicksand', sans-serif;
+        }
+        
+        .strip-container.film {
+            background: #1a1a1a;
+            padding: 12px;
+            position: relative;
+        }
+        
+        .strip-container.film::before,
+        .strip-container.film::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: repeating-linear-gradient(90deg, #ffd700, #ffd700 8px, #1a1a1a 8px, #1a1a1a 16px);
+            z-index: 2;
+        }
+        
+        .strip-container.film::before { top: 0; }
+        .strip-container.film::after { bottom: 0; }
+        
+        .strip-container.hearts {
+            background: white;
+            position: relative;
+            border: 3px solid #ffb6c1;
+        }
+        
+        .strip-container.hearts::before {
+            content: '❤️';
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            font-size: 24px;
+            background: white;
+            border-radius: 50%;
+            padding: 4px;
+            z-index: 3;
+        }
+        
+        .strip-container.hearts::after {
+            content: '❤️';
+            position: absolute;
+            bottom: -12px;
+            right: -12px;
+            font-size: 24px;
+            background: white;
+            border-radius: 50%;
+            padding: 4px;
+            z-index: 3;
+        }
+        
+        .strip-container.flowers {
+            background: white;
+            position: relative;
+            border: 3px solid #ffb8d1;
+        }
+        
+        .strip-container.flowers::before,
+        .strip-container.flowers::after {
+            content: '🌸';
+            position: absolute;
+            font-size: 20px;
+            background: white;
+            border-radius: 50%;
+            padding: 4px;
+            z-index: 3;
+        }
+        
+        .strip-container.flowers::before {
+            top: -12px;
+            left: -12px;
+        }
+        
+        .strip-container.flowers::after {
+            bottom: -12px;
+            right: -12px;
+        }
+        
+        .strip-container.stars {
+            background: white;
+            position: relative;
+            border: 3px solid #ffd700;
+        }
+        
+        .strip-container.stars::before,
+        .strip-container.stars::after {
+            content: '⭐';
+            position: absolute;
+            font-size: 20px;
+            background: white;
+            border-radius: 50%;
+            padding: 4px;
+            z-index: 3;
+        }
+        
+        .strip-container.stars::before {
+            top: -12px;
+            left: -12px;
+        }
+        
+        .strip-container.stars::after {
+            bottom: -12px;
+            right: -12px;
+        }
+        
+        .save-strip-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-strip-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 184, 209, 0.5);
+        }
+        
+        .save-strip-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Filter & Frame Buttons */
+        .filter-btn, .frame-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-weight: 600;
+        }
+        
+        .filter-btn.active, .frame-btn.active {
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+            color: white;
+            transform: scale(1.02);
+        }
+        
+        .filter-btn.locked, .frame-btn.locked {
+            opacity: 0.5;
+            filter: grayscale(0.5);
+            cursor: not-allowed;
+        }
+        
+        .filter-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+        }
+        
+        /* Sticker Section */
+        .sticker-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #ffb8d1;
+        }
+        
+        .sticker-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .sticker-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            font-size: 1.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sticker-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            background: linear-gradient(135deg, #ffb8d1, #e0c3fc);
+        }
+        
+        .image-sticker-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 5px;
+        }
+        
+        .image-sticker-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .image-sticker-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .edit-slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .edit-slider label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .edit-slider input {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ffb8d1;
+            -webkit-appearance: none;
+        }
+        
+        .edit-slider input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #ffb8d1;
+            cursor: pointer;
+        }
+        
+        .selected-photo-indicator {
+            background: #ffb8d1;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 1024px) {
+            .photobooth-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">🌸 Match & Snap</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Home</a>
+            <a href="game.html" class="nav-link"><i class="fas fa-gamepad"></i> Game</a>
+            <a href="photobooth.html" class="nav-link active"><i class="fas fa-camera"></i> Photo Booth</a>
+            <a href="shop.html" class="nav-link"><i class="fas fa-shopping-bag"></i> Shop</a>
+            <a href="gallery.html" class="nav-link"><i class="fas fa-images"></i> Gallery</a>
+            <a href="achievements.html" class="nav-link"><i class="fas fa-trophy"></i> Achievements</a>
+            <a href="about.html" class="nav-link"><i class="fas fa-heart"></i> About</a>
+        </div>
+        <div class="user-section">
+            <div class="coin-display"><i class="fas fa-star"></i> <span id="coin-counter">0</span></div>
+            <div class="avatar" id="avatar-display">👧</div>
+        </div>
+    </nav>
+
+    <div class="photobooth-container">
+        <!-- Camera Section -->
+        <div class="camera-section">
+            <h2 class="section-title" style="font-size: 2em;">📸 2x6 Inch Photo Strip</h2>
+            
+            <!-- Quality Settings -->
+            <div class="quality-settings">
+                <h4><i class="fas fa-hdmi"></i> Photo Quality</h4>
+                <div class="quality-buttons">
+                    <button class="quality-btn" onclick="setQuality('low')">Low (480p)</button>
+                    <button class="quality-btn active" onclick="setQuality('medium')">Medium (720p)</button>
+                    <button class="quality-btn" onclick="setQuality('high')">High (1080p)</button>
+                </div>
+                <p style="font-size: 0.7em; margin-top: 8px; color: #666;">Higher quality = larger file size</p>
+            </div>
+            
+            <div class="video-container">
+                <video id="video" autoplay playsinline></video>
+                <div class="video-overlay" id="camera-status">Starting camera...</div>
+                <div id="countdown"></div>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: center; margin: 20px 0;">
+                <button class="btn btn-primary" id="capture-btn" onclick="startPhotoStrip()">
+                    <i class="fas fa-camera"></i> Start 4-Photo Strip
+                </button>
+                <button class="btn btn-secondary" onclick="startCamera()"><i class="fas fa-play"></i></button>
+                <button class="btn btn-secondary" onclick="stopCamera()"><i class="fas fa-stop"></i></button>
+            </div>
+
+            <canvas id="canvas" style="display: none;"></canvas>
+            <canvas id="strip-canvas" style="display: none;"></canvas>
+
+            <!-- 2x6 Inch Photo Strip Preview -->
+            <div class="photo-strip-preview">
+                <div class="photo-strip-title">🎞️ Your Photo Strip 🎞️</div>
+                
+                <div id="strip-container" class="strip-container">
+                    <div class="strip-photo empty" id="strip-photo-0">📸 Photo 1</div>
+                    <div class="strip-photo empty" id="strip-photo-1">📸 Photo 2</div>
+                    <div class="strip-photo empty" id="strip-photo-2">📸 Photo 3</div>
+                    <div class="strip-photo empty" id="strip-photo-3">📸 Photo 4</div>
+                </div>
+                
+                <button class="save-strip-btn" id="save-strip-btn" onclick="savePhotoStrip()" disabled>
+                    💾 Save This Photo Strip to Gallery
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters, Frames & Editing Section -->
+        <div class="camera-section">
+            <h2 class="section-title" style="font-size: 2em;">✨ Customize ✨</h2>
+            
+            <div id="selected-photo-info" style="text-align: center; margin-bottom: 15px;">
+                <span class="selected-photo-indicator">📸 Take photos first, then click any photo to add stickers!</span>
+            </div>
+            
+            <!-- Filters -->
+            <div style="margin-bottom: 25px;">
+                <h3 style="margin-bottom: 15px;">🎨 Filters (Apply Before Taking Photos)</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <button class="filter-btn active" data-filter="normal" onclick="applyFilter('normal')">
+                        <span class="filter-preview" style="background: linear-gradient(135deg, #ffb8d1, #e0c3fc);"></span>
+                        Normal
+                    </button>
+                    <button class="filter-btn locked" data-filter="grayscale" onclick="checkAndApplyFilter('grayscale')">
+                        <span class="filter-preview" style="background: #a8a8a8;"></span>
+                        Grayscale
+                    </button>
+                    <button class="filter-btn locked" data-filter="sepia" onclick="checkAndApplyFilter('sepia')">
+                        <span class="filter-preview" style="background: #e2c4a6;"></span>
+                        Sepia
+                    </button>
+                    <button class="filter-btn locked" data-filter="pink" onclick="checkAndApplyFilter('pink')">
+                        <span class="filter-preview" style="background: #ffc0cb;"></span>
+                        Pink Dream
+                    </button>
+                    <button class="filter-btn locked" data-filter="purple" onclick="checkAndApplyFilter('purple')">
+                        <span class="filter-preview" style="background: #d8b4f0;"></span>
+                        Lavender
+                    </button>
+                    <button class="filter-btn locked" data-filter="warm" onclick="checkAndApplyFilter('warm')">
+                        <span class="filter-preview" style="background: #ffd7b5;"></span>
+                        Warm Glow
+                    </button>
+                </div>
+            </div>
+
+            <!-- Frames -->
+            <div style="margin-bottom: 25px;">
+                <h3 style="margin-bottom: 15px;">🖼️ Frames (Apply to Whole Strip)</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                    <button class="frame-btn active" data-frame="none" onclick="applyFrame('none')">
+                        <span class="filter-preview" style="background: #a0aec0;"></span>
+                        No Frame
+                    </button>
+                    <button class="frame-btn locked" data-frame="polaroid" onclick="checkAndApplyFrame('polaroid')">
+                        <span class="filter-preview" style="background: white; border: 2px solid #ccc;"></span>
+                        Polaroid
+                    </button>
+                    <button class="frame-btn locked" data-frame="film" onclick="checkAndApplyFrame('film')">
+                        <span class="filter-preview" style="background: #2d3748;"></span>
+                        Film Strip
+                    </button>
+                    <button class="frame-btn locked" data-frame="hearts" onclick="checkAndApplyFrame('hearts')">
+                        <span class="filter-preview" style="background: #ffb6c1;"></span>
+                        Hearts
+                    </button>
+                    <button class="frame-btn locked" data-frame="flowers" onclick="checkAndApplyFrame('flowers')">
+                        <span class="filter-preview" style="background: #ffb8d1;"></span>
+                        Flowers
+                    </button>
+                    <button class="frame-btn locked" data-frame="stars" onclick="checkAndApplyFrame('stars')">
+                        <span class="filter-preview" style="background: #ffd700;"></span>
+                        Stars
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stickers Section -->
+            <div class="sticker-section">
+                <h3 style="margin-bottom: 15px;">🎯 Add Stickers to Selected Photo</h3>
+                <p style="font-size: 0.8em; color: #666; margin-bottom: 10px;">Click any photo above first, then add stickers!</p>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin-bottom: 10px;">Emoji Stickers</h4>
+                    <div class="sticker-grid">
+                        <button class="sticker-btn" onclick="addSticker('🌸')">🌸</button>
+                        <button class="sticker-btn" onclick="addSticker('💖')">💖</button>
+                        <button class="sticker-btn" onclick="addSticker('🎀')">🎀</button>
+                        <button class="sticker-btn" onclick="addSticker('✨')">✨</button>
+                        <button class="sticker-btn" onclick="addSticker('🦄')">🦄</button>
+                        <button class="sticker-btn" onclick="addSticker('🌈')">🌈</button>
+                        <button class="sticker-btn" onclick="addSticker('⭐')">⭐</button>
+                        <button class="sticker-btn" onclick="addSticker('🌺')">🌺</button>
+                        <button class="sticker-btn" onclick="addSticker('🐱')">🐱</button>
+                        <button class="sticker-btn" onclick="addSticker('🐶')">🐶</button>
+                        <button class="sticker-btn" onclick="addSticker('🍕')">🍕</button>
+                        <button class="sticker-btn" onclick="addSticker('🎂')">🎂</button>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="margin-bottom: 10px;">🌟 Image Stickers</h4>
+                    <div class="sticker-grid" id="image-sticker-grid"></div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="clearStickersOnSelectedPhoto()" style="width: 100%; margin-top: 10px;">
+                    <i class="fas fa-eraser"></i> Clear Stickers on Current Photo
+                </button>
+            </div>
+
+            <!-- Editing Tools -->
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 2px dashed #ffb8d1;">
+                <h3 style="margin-bottom: 15px;">✏️ Edit Tools (Apply Before Taking Photos)</h3>
+                
+                <div class="edit-slider">
+                    <label>Brightness: <span id="brightness-val">100%</span></label>
+                    <input type="range" min="0" max="200" value="100" id="brightness" oninput="updateEdit('brightness', this.value)">
+                </div>
+                
+                <div class="edit-slider">
+                    <label>Contrast: <span id="contrast-val">100%</span></label>
+                    <input type="range" min="0" max="200" value="100" id="contrast" oninput="updateEdit('contrast', this.value)">
+                </div>
+                
+                <div class="edit-slider">
+                    <label>Sharpness: <span id="sharpness-val">100%</span></label>
+                    <input type="range" min="0" max="200" value="100" id="sharpness" oninput="updateEdit('sharpness', this.value)">
+                </div>
+
+                <button class="btn btn-secondary" onclick="resetEdits()" style="width: 100%; margin-top: 15px;">
+                    <i class="fas fa-undo"></i> Reset Edits
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/main.js"></script>
+    <script src="js/photobooth.js"></script>
+</body>
+</html>
